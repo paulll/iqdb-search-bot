@@ -74,7 +74,8 @@ async def handler(event):
 					Button.url('SauseNao', url='https://saucenao.com/search.php?db=999&dbmaski=32768&url={}'.format(image_url))
 				],
 				[
-					Button.url('TinEye', url='https://tineye.com/search?url={}'.format(image_url))
+					Button.url('TinEye', url='https://tineye.com/search?url={}'.format(image_url)),
+					Button.url('iqdb', url='https://iqdb.org1/?url={}'.format(image_url))
 				]
 			])
 
