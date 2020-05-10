@@ -58,6 +58,10 @@ async def handler(event):
 
 		if IQDB_MARKER_ERROR in body:
 			await event.message.reply('Something went wrong :c')
+		elif not 'https://ascii2d.net/search/url/' in body:
+			print(' --- unknown shit --- ')
+			print(body)
+			await message.reply('Something went wrong. Try again if you see this for the first time')	
 		elif IQDB_MARKER_NO_RESULTS in body:
 			image_url = body.split('https://ascii2d.net/search/url/')[1].split('">')[0]
 			buttons = client.build_reply_markup([
