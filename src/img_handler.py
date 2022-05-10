@@ -71,21 +71,22 @@ async def send_ipfs_stub(context, event, path):
     context['url'] = url
     if context['done'] == False:
         buttons = build_stub_buttons(url)
+        context['buttons'] = buttons
         await context['message'].edit('Still searching..', buttons=buttons)
 
 
 async def send_iqdb_resp(context, event, path):
     body = await request_iqdb(path)
     if IQDB_MARKER_ERROR in body:
-        context['message'].edit('')
+        await context['message'].edit('', buttons=context['buttons'])
         return None
     elif not 'https://ascii2d.net/search/url/' in body:
         print(' --- layout changed, could not parse --- ')
         print(body)
-        context['message'].edit('')
+        await context['message'].edit('', buttons=context['buttons'])
         return None
     elif IQDB_MARKER_NO_RESULTS in body:
-        context['message'].edit('')
+        await context['message'].edit('', buttons=context['buttons'])
         return None
     else:
         context['done'] = True
@@ -132,7 +133,8 @@ async def handler(event):
         )
         context = {
             'done': False,
-            'message': message
+            'message': message,
+            'buttons': []
         }
         await asyncio.wait([
             send_ipfs_stub(context, event, file),
