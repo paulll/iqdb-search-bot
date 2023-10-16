@@ -3,6 +3,7 @@ import aiohttp
 import asyncio
 import uuid
 import re
+import logging
 
 
 from aiofiles.os import remove
@@ -23,18 +24,20 @@ session = aiohttp.ClientSession()
 async def upload(path):
     file_id = 'iqdb/' + str(uuid.uuid4()) + Path(path).suffix
     headers = {'Content-Type': 'image/jpeg'}
-    seaweed_response_raw = await session.put(f'http://filer-service.seaweed/{file_id}?ttl=30m', 
+    seaweed_response_raw = await session.put(f'http://filer-service.seaweed:8888/{file_id}?ttl=30m', 
                                              data=open(path, 'rb'), 
                                              headers=headers)
     seaweed_response = await seaweed_response_raw.json()
 
-    print(f'seaweed uploaded to https://blob.paulll.cc/${file_id} : {seaweed_response}')
-    return f'https://blob.paulll.cc/${file_id}'
+    logging.info(f'seaweed uploaded to https://blob.paulll.cc/{file_id} : {seaweed_response}')
+    return f'https://blob.paulll.cc/{file_id}'
 
 
+def reply_markup(buttons):
+    return client.build_reply_markup(buttons)
 
 def build_stub_buttons(image_url):
-    return client.build_reply_markup([
+    return [
         [
             Button.url('Google', url='https://lens.google.com/uploadbyurl?url={}'.format(image_url)),
             Button.url('Yandex', url='https://yandex.ru/images/search?rpt=imageview&url={}'.format(image_url))
@@ -46,7 +49,7 @@ def build_stub_buttons(image_url):
         [
             Button.url('TinEye', url='https://tineye.com/search?url={}'.format(image_url))
         ]
-    ])
+    ]
 
 
 async def request_iqdb(path):
@@ -80,21 +83,21 @@ async def send_ipfs_stub(context, event, path):
     if context['done'] == False:
         buttons = build_stub_buttons(url)
         context['buttons'] = buttons
-        await context['message'].edit('Still searching..', buttons=buttons)
+        await context['message'].edit('Still searching..', buttons=reply_markup(buttons))
 
 
 async def send_iqdb_resp(context, event, path):
     body = await request_iqdb(path)
     if IQDB_MARKER_ERROR in body:
-        await context['message'].edit('', buttons=context['buttons'])
+        await context['message'].edit('', buttons=reply_markup(context['buttons']))
         return None
     elif not 'https://ascii2d.net/search/url/' in body:
-        print(' --- layout changed, could not parse --- ')
-        print(body)
-        await context['message'].edit('', buttons=context['buttons'])
+        logging.error(' --- layout changed, could not parse --- ')
+        logging.error(body)
+        await context['message'].edit('', buttons=reply_markup(context['buttons']))
         return None
     elif IQDB_MARKER_NO_RESULTS in body:
-        await context['message'].edit('', buttons=context['buttons'])
+        await context['message'].edit('', buttons=reply_markup(context['buttons']))
         return None
     else:
         context['done'] = True
@@ -122,10 +125,10 @@ async def send_iqdb_resp(context, event, path):
                     ])
                 else:
                     buttons.append([Button.url('{} ({}%)'.format(match_source, match_similarity), url=match_url)])
-        await context['message'].edit('', buttons=buttons)
+        await context['message'].edit('', buttons=reply_markup(buttons))
 
 
-@client.on(events.NewMessage)
+@client.on(events.NewMessage(incoming=True))
 async def handler(event):
     """
     message -> send iqdb ->      build keyboard    -> (send / replace existing)
@@ -145,9 +148,11 @@ async def handler(event):
             'buttons': []
         }
         try:
-            await asyncio.wait([
-                send_ipfs_stub(context, event, file),
-                send_iqdb_resp(context, event, file)
-            ], return_when=asyncio.ALL_COMPLETED)
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(send_ipfs_stub(context, event, file))
+                tg.create_task(send_iqdb_resp(context, event, file))
+        except Exception as e:
+            logging.error(e)
+            await message.edit(caption='Error')
         finally:
             await remove(file)

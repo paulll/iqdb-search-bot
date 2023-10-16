@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import re
 import aiofiles
+import logging
 
 from os.path import normpath
 from pyquery import PyQuery as pq
@@ -17,11 +18,9 @@ IQDB_MARKER_NO_RESULTS = 'No relevant matches'
 session = aiohttp.ClientSession()
 
 
-@client.on(events.NewMessage)
+@client.on(events.NewMessage(incoming=True))
 async def handler(event):
 	message = event.message
-	print(message)
-	print('--------------------')
 	urls = set()
 
 	if message.entities:
@@ -46,8 +45,8 @@ async def handler(event):
 		if IQDB_MARKER_ERROR in body:
 			await message.reply('URL {} seems invalid'.format(url))
 		elif not 'https://ascii2d.net/search/url/' in body:
-			print(' --- unknown shit --- ')
-			print(body)
+			logging.critical(' --- unknown shit --- ')
+			logging.critical(body)
 			await message.reply('Something went wrong with {}'.format(url))
 		elif IQDB_MARKER_NO_RESULTS in body:
 			image_url = body.split('https://ascii2d.net/search/url/')[1].split('">')[0]
