@@ -14,9 +14,9 @@ spec:
       containers:
       - name: app
         image: {{ .Values.werf.image.bot }}
-        environment:
+        env:
         - name: TELEGRAM_API_ID
-          value: {{ $.Values.bot.telegram.api_id }}
+          value: "{{ $.Values.bot.telegram.api_id }}"
         - name: TELEGRAM_API_HASH
           value: {{ $.Values.bot.telegram.api_hash }}
         - name: TELEGRAM_BOT_TOKEN
