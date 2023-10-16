@@ -153,6 +153,6 @@ async def handler(event):
                 tg.create_task(send_iqdb_resp(context, event, file))
         except Exception as e:
             logging.error(e)
-            await message.edit(caption='Error')
+            await message.edit('Error')
         finally:
             await remove(file)
