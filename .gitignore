@@ -1,7 +1,4 @@
 __pycache__
+__pypackages__
 *.session
 *.jpg
-src/secrets.py
-downloads/*
-__pypackages__
-.pdm.toml

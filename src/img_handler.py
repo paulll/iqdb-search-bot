@@ -136,7 +136,7 @@ async def handler(event):
     message = event.message
     if message.media and isinstance(message.media, MessageMediaPhoto):
         file, message = await asyncio.gather(
-            message.download_media(file="downloads"),
+            message.download_media(file="/dev/shm"),
             client.send_file(entity=event.chat, caption='Searching...', file=message.media, reply_to=event.message)
         )
         context = {
@@ -144,8 +144,10 @@ async def handler(event):
             'message': message,
             'buttons': []
         }
-        await asyncio.wait([
-            send_ipfs_stub(context, event, file),
-            send_iqdb_resp(context, event, file)
-        ], return_when=asyncio.ALL_COMPLETED)
-        await remove(file)
+        try:
+            await asyncio.wait([
+                send_ipfs_stub(context, event, file),
+                send_iqdb_resp(context, event, file)
+            ], return_when=asyncio.ALL_COMPLETED)
+        finally:
+            await remove(file)
