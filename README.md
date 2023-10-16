@@ -33,5 +33,5 @@ python3 app.py
 
 ## Kubernetes deployment
 
-Via [werf](https://github.com/werf/werf). Run `werf converge --repo=your-container-registry/repo`
+Via [werf](https://github.com/werf/werf). Run something like `werf converge --dev --repo=your-private-registry/repo` after configuring secrets. 
 
