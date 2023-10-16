@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot
+spec:
+  selector:
+    matchLabels:
+      app: bot
+  template:
+    metadata:
+      labels:
+        app: bot
+    spec:
+      containers:
+      - name: app
+        image: {{ .Values.werf.image.bot }}
+        environment:
+        - name: TELEGRAM_API_ID
+          value: {{ $.Values.bot.telegram.api_id }}
+        - name: TELEGRAM_API_HASH
+          value: {{ $.Values.bot.telegram.api_hash }}
+        - name: TELEGRAM_BOT_TOKEN
+          value: {{ $.Values.bot.telegram.bot_token }}

@@ -14,12 +14,15 @@ Instance: [@iqdbsearchbot](tg://resolve?domain=iqdbsearchbot)
 * Relatively high performance (uses mtproto api instead of bot api)
 * Low-latency without any webhooks (same reason)
 
-## Local installation
+## Local installation 
 
 ```bash
 git clone https://git.paulll.cc/paulll/iqdb-search-bot && cd iqdb-search-bot
 python3 -m pip install -r requirements.txt
 ```
+
+You may also need [seaweeedfs](https://github.com/seaweedfs/seaweedfs) instance or anything that can share files over http.
+Configure it in `src/img_handler.py`: `def upload(file_path)` should make file `file_path` publically available over http, and return its URL. That's optional and impacts only fallback search.
 
 Meanwhile, you have to get an API token from [@botfather](tg://resolve?domain=botfather) and an api id/hash pair from [my.telegram.org](https://my.telegram.org).
 Specify them in `src/secrets.py`. To start your bot, run:
@@ -27,3 +30,8 @@ Specify them in `src/secrets.py`. To start your bot, run:
 ```bash
 python3 app.py
 ```
+
+## Kubernetes deployment
+
+Via [werf](https://github.com/werf/werf). Run `werf converge --repo=your-container-registry/repo`
+

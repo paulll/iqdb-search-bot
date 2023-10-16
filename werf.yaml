@@ -1,0 +1,17 @@
+configVersion: 1
+project: iqdb-search-bot
+---
+image: bot
+from: python:3-bookworm
+git:
+  - add: /
+    to: /app
+    stageDependencies:
+      install:
+        - requrements.txt
+shell:
+  install:
+    - cd /app && pip install -r requirements.txt
+docker:
+  WORKDIR: /app
+  CMD: cd /app && python app.py
