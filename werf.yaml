@@ -2,15 +2,16 @@ configVersion: 1
 project: iqdb-search-bot
 ---
 image: bot
-from: python:3-bookworm
+from: python:3.11-bookworm
 git:
   - add: /
     to: /app
     stageDependencies:
       install:
-        - requrements.txt
+        - requirements.txt
 shell:
   install:
+    - pip install cython
     - cd /app && pip install -r requirements.txt
 docker:
   WORKDIR: /app
