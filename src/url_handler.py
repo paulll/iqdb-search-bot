@@ -53,7 +53,7 @@ async def handler(event):
 			image_url = body.split('https://ascii2d.net/search/url/')[1].split('">')[0]
 			buttons = client.build_reply_markup([
 				[
-					Button.url('Google', url='https://www.google.com/searchbyimage?image_url={}&safe=off'.format(image_url)),
+					Button.url('Google', url='https://lens.google.com/uploadbyurl?url={}'.format(image_url)),
 					Button.url('Yandex', url='https://yandex.ru/images/search?rpt=imageview&url={}'.format(image_url))
 				],
 				[
@@ -62,7 +62,7 @@ async def handler(event):
 				],
 				[
 					Button.url('TinEye', url='https://tineye.com/search?url={}'.format(image_url)),
-					Button.url('iqdb', url='https://iqdb.org1/?url={}'.format(image_url))
+					Button.url('iqdb', url='https://iqdb.org/?url={}'.format(image_url))
 				]
 			])
 			await client.send_file(entity=event.chat, file=image_url, buttons=buttons, reply_to=message)
