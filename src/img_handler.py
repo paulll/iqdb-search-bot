@@ -1,8 +1,9 @@
+from pathlib import Path
 import aiohttp
 import asyncio
+import uuid
 import re
-import aiofiles
-import aioipfs
+
 
 from aiofiles.os import remove
 from os.path import normpath
@@ -16,19 +17,26 @@ IQDB_MARKER_ERROR = '<!-- Failed...'
 IQDB_MARKER_NO_RESULTS = 'No relevant matches'
 
 session = aiohttp.ClientSession()
-ipfs = aioipfs.AsyncIPFS()
 
 
-async def upload_ipfs(path):
-    async for added in ipfs.add([path]):
-        added_hash = added['Hash']
-        return f'https://ipfs.paulll.cc/ipfs/{added_hash}'
+
+async def upload(path):
+    file_id = 'iqdb/' + str(uuid.uuid4()) + Path(path).suffix
+    headers = {'Content-Type': 'image/jpeg'}
+    seaweed_response_raw = await session.put(f'http://filer-service.seaweed/{file_id}?ttl=30m', 
+                                             data=open(path, 'rb'), 
+                                             headers=headers)
+    seaweed_response = await seaweed_response_raw.json()
+
+    print(f'seaweed uploaded to https://blob.paulll.cc/${file_id} : {seaweed_response}')
+    return f'https://blob.paulll.cc/${file_id}'
+
 
 
 def build_stub_buttons(image_url):
     return client.build_reply_markup([
         [
-            Button.url('Google', url='https://www.google.com/searchbyimage?image_url={}&safe=off'.format(image_url)),
+            Button.url('Google', url='https://lens.google.com/uploadbyurl?url={}'.format(image_url)),
             Button.url('Yandex', url='https://yandex.ru/images/search?rpt=imageview&url={}'.format(image_url))
         ],
         [
@@ -67,7 +75,7 @@ async def request_iqdb(path):
 
 
 async def send_ipfs_stub(context, event, path):
-    url = await upload_ipfs(path)
+    url = await upload(path)
     context['url'] = url
     if context['done'] == False:
         buttons = build_stub_buttons(url)
