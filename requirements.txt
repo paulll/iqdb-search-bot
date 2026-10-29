@@ -5,3 +5,4 @@ aiodns
 cchardet
 telethon
 PySocks
+python-socks[asyncio]
