@@ -21,7 +21,7 @@ spec:
           value: {{ $.Values.bot.telegram.api_hash }}
         - name: TELEGRAM_BOT_TOKEN
           value: {{ $.Values.bot.telegram.bot_token }}
-        - name: TELEGRAM_PROXY_HOST
-          value: "{{ $.Values.bot.telegram.proxy_host | default "" }}"
-        - name: TELEGRAM_PROXY_PORT
-          value: "{{ $.Values.bot.telegram.proxy_port | default "7890" }}"
+        {{- range $k, $v := .Values.bot.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}

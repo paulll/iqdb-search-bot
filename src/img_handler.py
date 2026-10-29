@@ -17,14 +17,23 @@ IQDB_HOST = 'https://iqdb.org/'
 IQDB_MARKER_ERROR = '<!-- Failed...'
 IQDB_MARKER_NO_RESULTS = 'No relevant matches'
 
-session = aiohttp.ClientSession()
+session = None
+
+
+def get_session():
+    # created lazily: aiohttp >=3.9 ClientSession requires a running loop,
+    # which does not exist yet at module import time
+    global session
+    if session is None:
+        session = aiohttp.ClientSession(trust_env=True)
+    return session
 
 
 
 async def upload(path):
     file_id = 'iqdb/' + str(uuid.uuid4()) + Path(path).suffix
     headers = {'Content-Type': 'image/jpeg'}
-    seaweed_response_raw = await session.put(f'http://filer-service.seaweed:8888/{file_id}?ttl=30m', 
+    seaweed_response_raw = await get_session().put(f'http://filer-service.seaweed:8888/{file_id}?ttl=30m', 
                                              data=open(path, 'rb'), 
                                              headers=headers)
     seaweed_response = await seaweed_response_raw.json()
@@ -72,7 +81,7 @@ async def request_iqdb(path):
         ('service[]', '11'),
         ('service[]', '13')
     )
-    resp = await session.post(IQDB_HOST, data=form)
+    resp = await get_session().post(IQDB_HOST, data=form)
     body = await resp.text()
     return body
 

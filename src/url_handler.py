@@ -15,7 +15,16 @@ IQDB_HOST = 'https://iqdb.org/?'
 IQDB_MARKER_ERROR = '<!-- Failed...'
 IQDB_MARKER_NO_RESULTS = 'No relevant matches'
 
-session = aiohttp.ClientSession()
+session = None
+
+
+def get_session():
+    # created lazily: aiohttp >=3.9 ClientSession requires a running loop,
+    # which does not exist yet at module import time
+    global session
+    if session is None:
+        session = aiohttp.ClientSession(trust_env=True)
+    return session
 
 
 @client.on(events.NewMessage(incoming=True))
@@ -36,7 +45,7 @@ async def handler(event):
 		process = await message.reply("Processing... {} queued".format(queued))
 	if queued == 1:
 		process = await message.reply("Processing...")
-	responces = await asyncio.gather(*[session.get(IQDB_HOST + urlencode({'url': url})) for url in urls])
+	responces = await asyncio.gather(*[get_session().get(IQDB_HOST + urlencode({'url': url})) for url in urls])
 
 	for resp in responces:
 		body = await resp.text()
