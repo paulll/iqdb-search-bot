@@ -4,3 +4,4 @@ pyquery
 aiodns
 cchardet
 telethon
+PySocks

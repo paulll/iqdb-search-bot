@@ -1,6 +1,8 @@
 bot:
   telegram:
-    api_id: 0
-    api_hash: ''
-    bot_token: ''
-  enable_vpa: false
+    api_id: '27020'  # public constant
+    api_hash: ''  # supply via `werf bundle -- --values secrets.yaml` or helm --set
+    bot_token: ''  # supply out of band (was baked into the 2024 bundle)
+    proxy_host: '192.168.1.2'
+    proxy_port: '7890'
+  enable_vpa: true

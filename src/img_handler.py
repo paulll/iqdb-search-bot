@@ -4,7 +4,7 @@ import asyncio
 import uuid
 import re
 import logging
-
+import traceback
 
 from aiofiles.os import remove
 from os.path import normpath
@@ -152,7 +152,9 @@ async def handler(event):
                 tg.create_task(send_ipfs_stub(context, event, file))
                 tg.create_task(send_iqdb_resp(context, event, file))
         except Exception as e:
-            logging.error(e)
+            logging.error(traceback.format_exc())
+            for nested in e.exceptions:
+                logging.error('nested', nested)
             await message.edit('Error')
         finally:
             await remove(file)
